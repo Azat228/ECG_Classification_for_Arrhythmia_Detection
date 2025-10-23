@@ -1,4 +1,5 @@
 # Project CE_ARR: Final Report
+<img width="420" height="208" alt="image" src="https://github.com/user-attachments/assets/7c88f19a-bdb3-411f-b29d-8c92c67b2c7f" />
 
 ## EE4C12 Machine Learning for Electrical Engineering Applications
 
@@ -28,7 +29,8 @@ on the test set. These results demonstrate the effectiveness of gradient boostin
 
 ## ML Pipeline
 
-![Pipeline of the ML algorithm development](Figs/pipeline.png)
+![Pipeline of the ML algorithm development](<img width="834" height="247" alt="image" src="https://github.com/user-attachments/assets/5d6edcdd-498c-4ffb-bbdd-0179f213425d" />
+)
 
 **Pipeline Steps:**
 
@@ -77,7 +79,8 @@ on the test set. These results demonstrate the effectiveness of gradient boostin
 - Dataset is highly imbalanced; some classes are rare.
 - Metrics are computed using **macro averaging** (all classes equally important).
 
-![Sample class distribution](Figs/train-set-distribution.png)
+![Sample class distribution](<img width="695" height="348" alt="image" src="https://github.com/user-attachments/assets/7071101c-107b-4924-aca0-551809595daf" />
+)
 
 ---
 
