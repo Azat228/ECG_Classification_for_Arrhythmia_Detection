@@ -1,162 +1,173 @@
-\documentclass[a4paper,12pt]{article}
-\usepackage{geometry}
-\geometry{margin=1in}
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{float}
-\usepackage{caption}
+# Project CE_ARR — Final Report
 
-\begin{document}
+<img width="518" height="319" alt="TUDelft_logo_rgb" src="https://github.com/user-attachments/assets/9e5964ac-ea16-455d-871f-9acf5d05f8f5" />
 
-\begin{center}
-    \includegraphics[width=60mm]{Project_ML/Figs/TUDelft_logo_rgb.png}
+**EE4C12 Machine Learning for Electrical Engineering Applications**  
+**Group members:**  
+- **Azat Idayatov** (aidayatov@tudelft.nl, Student ID: 6551505)  
+- **Giorgio Recchilongo** (grecchilongo@tudelft.nl, Student ID: 6549632)  
 
-    \vspace{10mm}
-    {\LARGE \textbf{Project CE\_ARR}}\\[2mm]
-    {\large \textbf{Final Report}}\\[6mm]
-    {\large \textbf{EE4C12 Machine Learning for Electrical Engineering Applications}}\\[2mm]
-    \textbf{Azat Idayatov, aidayatov@tudelft.nl (6551505)}\\
-    \textbf{Giorgio Recchilongo, grecchilongo@tudelft.nl (6549632)}
-\end{center}
+---
 
-\vspace{8mm}
+## Summary
 
-\section*{Summary}
+This project aimed to classify different types of cardiac arrhythmias in patients using ECG data and machine learning. Multiple model architectures were explored, including Multi-Layer Perceptrons (MLPs), Support Vector Machines (SVMs), Logistic Regression, and tree-based ensembles (Random Forest, LightGBM). To address class imbalance, we used class weighting and SMOTE oversampling.  
+After hyperparameter tuning, the LightGBM model performed best, achieving a **macro-F1 score of 0.76**, **macro-accuracy of 0.98**, and **macro-recall of 0.75** on the test set, demonstrating the effectiveness of gradient boosting for this unbalanced classification task.
 
-This project focused on classifying various types of cardiac arrhythmias from ECG data using machine learning. Several model architectures were evaluated, including Multi-Layer Perceptrons (MLPs), Support Vector Machines (SVMs), Logistic Regression, and tree-based ensembles such as Random Forest and LightGBM. To address the strong class imbalance in the data, we applied class weighting and SMOTE oversampling techniques. After thorough hyperparameter tuning, the LightGBM model demonstrated the best performance, achieving a macro-F1 score of 0.76, a macro-accuracy of 0.98, and a macro-recall of 0.75 on the test set. These results highlight the effectiveness of gradient boosting methods for unbalanced medical classification problems.
+---
 
-\section*{Machine Learning Pipeline}
+## ML Pipeline
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{Project_ML/Figs/pipeline.png}
-    \caption{Machine learning pipeline for arrhythmia classification.}
-    \label{fig:pipeline}
-\end{figure}
+![ML Pipeline](Project_ML/Figs/pipeline.png)
 
-Figure~\ref{fig:pipeline} illustrates the workflow adopted in this project. The initial stage, \emph{Data Preprocessing}, involved ECG acquisition and QRS peak detection using the Pan-Tompkins algorithm. Individual heartbeats were segmented, and the dataset was split into training, validation, and test partitions. To avoid data leakage, standard normalization was fitted on the training data and then applied to all samples.
+*Figure 1: Pipeline of the ML algorithm development*
 
-Next, during \emph{Feature Design}, categorical target labels were one-hot encoded to prevent bias. The \emph{Model Exploration} phase involved training baseline models and evaluating their performance on the validation set, guiding the selection of promising candidates for further refinement. Selected models then underwent hyperparameter tuning using cross-validation. Finally, the best model was trained on the complete training data and assessed on the unseen test set.
+The machine learning workflow consisted of the following steps:
 
-\section*{Task 1: Model Selection}
+1. **Data Preprocessing**:  
+    - ECG data acquisition  
+    - QRS peak detection using the Pan Tompkins Algorithm  
+    - Beat segmentation (one beat per sample)  
+    - Splitting into train, validation, and test sets  
+    - Standard normalization (fit on training data to avoid leakage)
 
-We evaluated a range of models for arrhythmia classification:
+2. **Feature Design**:  
+    - One-hot encoding of target labels
 
-\begin{itemize}
-    \item \textbf{Linear Models (Logistic Regression, LinearSVC)} were used as baselines to gauge whether the task was linearly separable and to provide a computationally efficient benchmark.
-    \item \textbf{Non-Linear SVM (RBF kernel)} was included to explore the benefit of non-linear decision boundaries, despite higher computational cost.
-    \item \textbf{Tree-Based Ensembles (Random Forest, LightGBM)} were considered for their robustness and efficiency, particularly when dealing with large and complex datasets.
-    \item \textbf{Multi-Layer Perceptron (MLP)} models were explored, with various techniques applied to address class imbalance, including class weighting, SMOTE, and undersampling.
-\end{itemize}
+3. **Model Exploration**:  
+    - Training and validation of baseline models  
+    - Comparison of initial performance
 
-\subsection*{Performance Metrics}
+4. **Model Selection and Tuning**:  
+    - Hyperparameter search on best models  
+    - Re-evaluation on validation set
 
-Given the medical context, minimizing false negatives was prioritized. Misclassifying a pathological sample as healthy presents a greater clinical risk than a false positive. Therefore, the F1 score was selected as the principal metric, as it balances precision and recall. When F1 scores were similar, recall was used as a tiebreaker.
+5. **Final Evaluation**:  
+    - Training on all training data  
+    - Testing on the unseen test set
 
-\subsection*{Class Imbalance Handling}
+---
 
-The dataset was highly imbalanced, with the majority class (no disease) vastly outnumbering others (see Figure~\ref{fig:train-dis}). To ensure fair evaluation, all metrics were macro-averaged, giving equal importance to each class.
+## Task 1: Model Selection
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Project_ML/Figs/train-set-distribution.png}
-    \caption{Class distribution in the training set.}
-    \label{fig:train-dis}
-\end{figure}
+### Models Evaluated
 
-\subsection*{Results}
+- **Linear Models** (Logistic Regression, LinearSVC): Fast baselines to test for linear separability.
+- **Non-Linear SVM** (RBF Kernel): To examine non-linear boundaries, despite higher computational cost.
+- **Tree-Based Ensembles** (Random Forest, LightGBM): To test robustness and efficiency on structured data.
+- **Multi-Layer Perceptron (MLP)**: Including variants with class weighting, SMOTE, and random undersampling.
 
-Table~\ref{tab:model_comparison} presents validation performance for the baseline models.
+### Performance Metrics
 
-\begin{table}[H]
-    \centering
-    \caption{Validation performance of baseline models (macro-averaged).}
-    \label{tab:model_comparison}
-    \begin{tabular}{lcc}
-        \toprule
-        \textbf{Model} & \textbf{Recall (Macro)} & \textbf{F1 (Macro)} \\
-        \midrule
-        Simple MLP & 0.37 & 0.38 \\
-        Weighted MLP & 0.67 & 0.30 \\
-        SMOTE MLP & 0.62 & 0.45 \\
-        Downsampled MLP & 0.76 & 0.52 \\
-        Random Forest & 0.73 & 0.57 \\
-        LightGBM & 0.68 & 0.72 \\
-        SVC (RBF) & 0.86 & 0.61 \\
-        Downsampled SVC (RBF) & 0.79 & 0.49 \\
-        SVC (Linear) & 0.59 & 0.30 \\
-        Logistic Regression & 0.69 & 0.35 \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+- **F1-score** was the primary metric (harmonic mean of precision and recall), prioritizing minimization of false negatives due to clinical significance.
+- **Macro-averaging** was used to ensure class balance in evaluation.
 
-Linear models exhibited poor performance, suggesting the task is not linearly separable. Non-linear SVMs and tree-based models fared better, with LightGBM delivering the highest F1 score with low computation time. Among MLP variants, random undersampling of the majority class yielded the best results.
+### Handling Imbalanced Data
 
-Figures~\ref{fig:conf-simp-mlp} and~\ref{fig:conf-rand-for} show confusion matrices for the simple MLP and Random Forest, respectively.
+The dataset had over 65,000 samples, but some classes had as few as 2 examples (see below). To compensate, we always reported **macro-averaged metrics**.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Project_ML/Figs/conf-mat-simp-mlp.png}
-    \caption{Confusion matrix: simple MLP model.}
-    \label{fig:conf-simp-mlp}
-\end{figure}
+![Sample class distribution](Project_ML/Figs/train-set-distribution.png)
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Project_ML/Figs/conf-mat-rand-for.png}
-    \caption{Confusion matrix: Random Forest model.}
-    \label{fig:conf-rand-for}
-\end{figure}
+*Figure 2: Sample class distribution*
 
-\section*{Task 2: Optimization and Final Results}
+### Results
 
-The top-performing models (Downsampled MLP, Random Forest, LightGBM) were selected for hyperparameter optimization via \texttt{RandomizedSearchCV}. Table~\ref{tab:model_results} summarizes their post-optimization performance:
+| Model                        | Recall (Macro) | F1 (Macro) |
+|------------------------------|---------------|------------|
+| Simple MLP                   | 0.37          | 0.38       |
+| Weighted MLP                 | 0.67          | 0.30       |
+| SMOTE MLP                    | 0.62          | 0.45       |
+| Downsampled MLP              | 0.76          | 0.52       |
+| Random Forest                | 0.73          | 0.57       |
+| Gradient Boosting (LightGBM) | 0.68          | 0.72       |
+| SVC RBF                      | 0.86          | 0.61       |
+| Downsampled SVC RBF          | 0.79          | 0.49       |
+| SVC Linear                   | 0.59          | 0.30       |
+| Logistic Regression          | 0.69          | 0.35       |
 
-\begin{table}[H]
-    \centering
-    \caption{Validation set metrics after optimization. (M: macro-averaged, W: weighted)}
-    \label{tab:model_results}
-    \begin{tabular}{lccccc}
-        \toprule
-        \textbf{Model} & \textbf{Accuracy} & \textbf{Recall (M)} & \textbf{F1 (M)} & \textbf{Recall (W)} & \textbf{F1 (W)} \\
-        \midrule
-        Downsampled MLP & 0.90 & 0.76 & 0.50 & 0.85 & 0.88 \\ 
-        Random Forest & 0.97 & 0.61 & 0.66 & 0.98 & 0.97 \\
-        LightGBM & 0.98 & 0.71 & 0.72 & 0.98 & 0.98 \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+*Table 1: Validation performance of baseline models (macro-averaged)*
 
-LightGBM was ultimately chosen as the final model due to its superior macro F1 and recall. The test set results are shown in Table~\ref{tab:final_metrics}:
+- Linear models performed poorly, indicating non-linearity.
+- SVC (RBF) and tree-based models performed better, with LightGBM providing the best F1 and fastest training.
+- Among MLPs, random undersampling of the majority class gave the best results.
 
-\begin{table}[H]
-    \centering
-    \caption{Final metrics: optimized LightGBM on test set.}
-    \label{tab:final_metrics}
-    \begin{tabular}{lc}
-        \toprule
-        \textbf{Metric} & \textbf{Score} \\
-        \midrule
-        Accuracy & 0.9796 \\
-        Recall (Macro) & 0.7492 \\
-        Recall (Weighted) & 0.9796 \\
-        F1 Score (Macro) & 0.7645 \\
-        F1 Score (Weighted) & 0.9794 \\
-        Precision (Macro) & 0.7958 \\
-        Precision (Weighted) & 0.9794 \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+#### Example Confusion Matrices
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Project_ML/Figs/conf-mat-test.png}
-    \caption{Confusion matrix: LightGBM model on test set.}
-    \label{fig:conf_mat_test}
-\end{figure}
+| Simple MLP | Random Forest |
+|:----------:|:-------------:|
+| ![Simple MLP confusion](Project_ML/Figs/conf-mat-simp-mlp.png) | ![RF confusion](Project_ML/Figs/conf-mat-rand-for.png) |
 
-\section*{Conclusion}
+---
 
-Through systematic exploration and optimization, we found that advanced tree-based ensembles, particularly LightGBM, outperformed other models for arrhythmia classification from ECG data. The main challenge was severe class imbalance, which we managed by combining class weighting, synthetic oversampling, and careful metric selection. The final LightGBM model achieved a macro F1 of 0.76 and high accuracy, demonstrating the value of gradient boosting for complex, imbalanced medical datasets.
+## Task 2: Model Selection and Optimization
 
-\end{document}
+The following models were selected for further optimization:
+
+- Downsampled MLP
+- Random Forest
+- Gradient Boosting (LightGBM)
+
+SVC (RBF) was not optimized further due to high computational cost.
+
+### Methodology
+
+Hyperparameter tuning was performed using `RandomizedSearchCV` with 20 random parameter combinations and 3-fold cross-validation.
+
+### Results Before and After Optimization
+
+**Before optimization:**
+
+| Model              | Accuracy | Recall (Macro) | F1 (Macro) |
+|--------------------|----------|----------------|------------|
+| Downsampled MLP    | 0.90     | 0.80           | 0.55       |
+| Random Forest      | 0.93     | 0.55           | 0.61       |
+| LightGBM           | 0.94     | 0.69           | 0.68       |
+
+**After optimization:**
+
+| Model              | Accuracy | Recall (Macro) | F1 (Macro) | Recall (Weighted) | F1 (Weighted) |
+|--------------------|----------|----------------|------------|-------------------|---------------|
+| Downsampled MLP    | 0.90     | 0.76           | 0.50       | 0.85              | 0.88          |
+| Random Forest      | 0.97     | 0.61           | 0.66       | 0.98              | 0.97          |
+| LightGBM           | 0.98     | 0.71           | 0.72       | 0.98              | 0.98          |
+
+*Table 2: Validation performance after optimization*
+
+### Example Optimized Confusion Matrices
+
+- **Downsampled MLP:**  
+  ![Confusion: Downsampled MLP](Project_ML/Figs/conf_mat_downsamp.png)
+- **Random Forest:**  
+  ![Confusion: Random Forest](Project_ML/Figs/Forest_search.png)
+- **LightGBM:**  
+  ![Confusion: LightGBM](Project_ML/Figs/Gradient_boosting.png)
+
+---
+
+## Final Model Results
+
+**LightGBM** was selected as the final model. On the test set, it achieved:
+
+| Metric                | Score   |
+|-----------------------|---------|
+| Accuracy              | 0.9796  |
+| Recall (Macro)        | 0.7492  |
+| Recall (Weighted)     | 0.9796  |
+| F1 Score (Macro)      | 0.7645  |
+| F1 Score (Weighted)   | 0.9794  |
+| Precision (Macro)     | 0.7958  |
+| Precision (Weighted)  | 0.9794  |
+
+*Table 3: Final metrics for LightGBM on the test set*
+<img width="802" height="624" alt="conf-mat-rand-for" src="https://github.com/user-attachments/assets/f52867bd-7570-40ca-a959-d9ea7f85e305" />
+
+
+
+---
+
+## Conclusion
+
+This project explored and compared multiple machine learning models for arrhythmia classification from ECG data. The main challenge was severe class imbalance, which was mitigated through class weighting, oversampling, and careful metric selection.  
+Tree-based ensembles, especially **LightGBM**, clearly outperformed linear models and basic neural networks, achieving a macro F1-score of 0.76 and high accuracy. Gradient boosting is an effective approach for such unbalanced medical classification problems.
+
+---
